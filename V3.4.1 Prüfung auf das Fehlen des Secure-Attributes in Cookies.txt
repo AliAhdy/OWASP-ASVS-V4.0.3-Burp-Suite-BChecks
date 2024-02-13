@@ -1,0 +1,23 @@
+metadata:
+    language: v1-beta
+    name: "V3.4.1 Prüfung auf das Fehlen des Secure-Attributes in Cookies"
+    description: "Überprüfen das Cookies, die ohne das 'Secure'-Attribut in 
+                  HTTP-Antworten gesetzt werden."
+    author: "Ali Al-Haidary"
+    tags: "Cookies, Session-Management"
+
+given response then
+    # Überprüfung, ob das "Secure"-Attribut fehlt.
+    if {latest.response.headers} matches "(?i)Set-Cookie: [^;]+;?(?!.*Secure)" then
+        report issue:
+            severity: medium
+            confidence: firm
+            detail: "Es wurden Cookies ohne das 'Secure'-Attribut gefunden. Dies kann 
+                     Cookies einer Abfanggefahr über 
+                     unverschlüsselte Verbindungen aussetzen."
+            remediation: "Sicherstellen, dass das 'Secure'-Attribut für alle 
+                          Cookies gesetzt ist, um eine 
+                          Übertragung über unverschlüsselte HTTP-Verbindungen zu verhindern."
+    end if
+
+

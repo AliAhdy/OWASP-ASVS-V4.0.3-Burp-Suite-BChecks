@@ -1,0 +1,26 @@
+metadata:
+    language: v1-beta
+    name: "V14.4.1 Content-Type Header und Charset Validierung"
+    description: "Sicherstellen, dass jede HTTP-Antwort einen Content-Type Header mit einem angegebenen sicheren Zeichensatz 
+                  für bestimmte Content-Typen enthält."
+    author: "Ali Al-Haidary"
+    tags: "HTTP Response, Content-Type, Charset"
+
+given response then
+    #Wenn der Content-Type Header fehlt
+    if not ({latest.response.headers} matches "(?i)Content-Type: .*") then
+        report issue:
+            severity: medium
+            confidence: firm
+            detail: "Fehlender Content-Type Header in der HTTP-Antwort."
+            remediation: "Stellen Sie sicher, dass jede HTTP-Antwort einen Content-Type Header enthält."
+    else if ({latest.response.headers} matches "(?i)Content-Type: (text/.*|.*\+xml|application/xml)") 
+             and not ({latest.response.headers} matches "(?i)Content-Type: .*charset=(UTF-8|ISO-8859-1)") then
+        report issue:
+            severity: medium
+            confidence: firm
+            detail: "Content-Type Header gibt keinen sicheren Zeichensatz an."
+            remediation: "Verwenden von UTF-8 oder ISO-8859-1 als Zeichensatz für die Content-Typen text/*, */+xml und application/xml."
+    end if
+
+

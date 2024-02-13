@@ -1,0 +1,39 @@
+metadata:
+    language: v1-beta
+    name: "V14.4.2 API Content-Disposition Header Überprüfung"
+    description: "Dieses BCheck überprüft, ob alle API-Antworten einen Content-Disposition Header mit 'attachment' und
+                  einem geeigneten Dateinamen enthalten"
+    author: "Ali Al-Haidary"
+    tags: "Information Disclosure, HTTP Headers"
+
+#Zu überprüfende Header
+define:
+    contentDisp = "Content-Disposition"
+    contentDispCol = "Content-Disposition:"
+    contentDispVal = `Content-Disposition: attachment; filename="api.json"`
+
+    issueDetailMissing = `Der {contentDisp} Header scheint in dieser API-Antwort zu fehlen.`
+    issueDetailIncorrect = `Ein inkorrekter {contentDisp} Header-Wert wurde gefunden. Erwartet: '{contentDispVal}'.`
+    issueRemediationMissing = `Sicherstellen, dass jede API-Antwort einen {contentDisp} Header mit 'attachment' und einem 
+                               für den Inhaltstyp geeigneten Dateinamen enthält.`
+    issueRemediationIncorrect = `Überprüfen des {contentDisp} Header-Wert der Antwort, um sicherzustellen, dass dieser 
+                                 mit '{contentDispVal}' übereinstimmt.`
+
+given response then
+    if not({latest.response.headers} matches "{contentDispCol}.*") then
+        #Wenn der Content-Disposition Header fehlt
+        report issue:
+            severity: medium
+            confidence: firm
+            detail: `{issueDetailMissing}`
+            remediation: `{issueRemediationMissing}`
+    else if not ({latest.response.headers} matches "{contentDispVal}") then
+        #Wenn der Header-Wert inkorrekt ist
+        report issue:
+            severity: medium
+            confidence: firm
+            detail: `{issueDetailIncorrect}`
+            remediation: `{issueRemediationIncorrect}`
+    end if
+
+

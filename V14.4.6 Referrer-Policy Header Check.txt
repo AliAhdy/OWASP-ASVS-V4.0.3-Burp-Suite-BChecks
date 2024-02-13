@@ -1,0 +1,38 @@
+metadata:
+    language: v1-beta
+    name: "V14.4.6 Referrer-Policy Header Check"
+    description: "Überprüft, ob ein geeigneter Referrer-Policy Header vorhanden ist, um die Weitergabe sensibler Informationen 
+                  über den Referer Header zu verhindern."
+    author: "Ali Al-Haidary"
+    tags: "Konfiguration, Referrer-Policy Header"
+
+define:
+    referrerPolicy = "Referrer-Policy"
+    referrerPolicyCol = "Referrer-Policy:"
+
+    #passende Werte für den Referrer-Policy Header
+    suitableValues = "no-referrer, same-origin, strict-origin, strict-origin-when-cross-origin"
+
+    issueDetailMissing = "Der {referrerPolicy} Header fehlt in dieser Antwort."
+    issueDetailInappropriate = "Der Wert des {referrerPolicy} Headers ist nicht geeignet, um die Weitergabe sensibler Informationen zu verhindern."
+
+    issueRemediation = "Sicherstellen, dass jede Antwort einen {referrerPolicy} Header mit einem der folgenden Werte enthält: {suitableValues}."
+
+given response then
+    if not ({latest.response.headers} matches "{referrerPolicyCol}.*") then
+        # Wenn der Referrer-Policy Header fehlt
+        report issue:
+            severity: medium
+            confidence: firm
+            detail: "{issueDetailMissing}"
+            remediation: "{issueRemediation}"
+    else if not ({latest.response.headers} matches "{referrerPolicyCol} ({suitableValues})") then
+        #Wenn der Wert des Referrer-Policy Headers ungeeignet ist
+        report issue:
+            severity: medium
+            confidence: firm
+            detail: "{issueDetailInappropriate}"
+            remediation: "{issueRemediation}"
+    end if
+
+

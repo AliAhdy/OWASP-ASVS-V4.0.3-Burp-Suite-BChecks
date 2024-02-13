@@ -1,0 +1,38 @@
+metadata:
+    language: v1-beta
+    name: "V14.4.7 X-Frame-Options Check"
+    description: "Überprüft das Vorhandensein des X-Frame-Options Antwort-Headers oder des Content-Security-Policy Antwort-Headers 
+                  mit 'frame-ancestors' in den Antworten."
+    author: "Ali Al-Haidary"
+    tags: "Konfiguration, X-Frame-Option Header"
+
+define:
+    cspFrameAncestorsCol = "Content-Security-Policy:"
+    xFrameOptionsCol = "X-Frame-Options:"
+
+    issueDetailMissing = "X-Frame-Options Antwort-Header fehlt"
+    issueDetailMisconfigured = "X-Frame-Options Antwort-Header ist fehlkonfiguriert"
+
+    issueRemediation = "Hinzufügen eines X-Frame-Options Antwort-Header mit der Richtlinie SAMEORIGIN"
+
+given response then
+    if not({latest.response.headers} matches "Content-Type: image/.") and not({latest.response.headers} matches 
+            "Content-Type: application/javascript") and not({latest.response.headers} matches "Content-Type: text/css") then
+        if not ({latest.response.headers} matches "{cspFrameAncestorsCol}.*frame-ancestors.*") then
+            if not ({latest.response.headers} matches "{xFrameOptionsCol}.*") then
+                report issue:
+                    severity: low
+                    confidence: certain
+                    detail: "{issueDetailMissing}"
+                    remediation: "{issueRemediation}"
+            else if not ({latest.response.headers} matches "{xFrameOptionsCol} SAMEORIGIN") then
+                report issue:
+                    severity: low
+                    confidence: certain
+                    detail: "{issueDetailMisconfigured}"
+                    remediation: "{issueRemediation}"
+            end if
+        end if
+    end if
+
+

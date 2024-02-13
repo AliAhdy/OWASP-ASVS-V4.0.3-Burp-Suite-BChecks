@@ -1,0 +1,18 @@
+metadata:
+    language: v1-beta
+    name: "V14.4.4 X-Content-Type-Options Header Überprüfung"
+    description: "Überprüft das Vorhandensein des X-Content-Type-Options: nosniff Headers in der Antwort"
+    author: "Ali Al-Haidary"
+    tags: "Konfiguration, X-Content-Type"
+
+given response then
+    #Wenn der X-Content-Type-Options: nosniff Header fehlt
+    if not ({latest.response.headers} matches "X-Content-Type-Options: nosniff") then
+        report issue:
+            severity: low
+            confidence: certain
+            detail: "X-Content-Type-Options: nosniff Header fehlt in der Antwort."
+            remediation: "Füge einen X-Content-Type-Options: nosniff Header zur Antwort hinzu."
+    end if
+
+

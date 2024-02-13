@@ -1,0 +1,24 @@
+metadata:
+  language: v1-beta
+  name: "V3.4.3 Überprüfung des SameSite-Attributs in Session-Cookies"
+  description: "Dieser Check überprüft, ob das 'SameSite'-Attribut bei 
+                Cookie-basierten Session-Tokens gesetzt ist, um die 
+                Exposition gegenüber CSRF-Angriffen zu begrenzen."
+  author: "Ali Al-Haidary"
+  tags: "Cookies, CSRF-Schutz"
+
+given response then
+  # Überprüfe Set-Cookie-Header auf das Fehlen des 'SameSite'-Attributs
+  if {latest.response} matches "(?i)Set-Cookie: [^;]+;?(?!.*;\\s*SameSite=(Lax|Strict)\\s*(;|$))" then
+    report issue:
+      severity: medium
+      confidence: firm
+      detail: "Session-Cookies ohne das 'SameSite'-Attribut oder mit 
+                inadäquatem Wert wurden gefunden."
+      remediation: "Sicherstellen, dass das 'SameSite'-Attribut für 
+                    alle Session-Cookies gesetzt ist und einen 
+                    angemessenen Wert ('Lax' oder 'Strict') aufweist, um 
+                    Schutz gegen CSRF-Angriffe zu bieten."
+  end if
+
+

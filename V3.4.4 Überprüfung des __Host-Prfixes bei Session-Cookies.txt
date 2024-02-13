@@ -1,0 +1,20 @@
+metadata:
+  language: v1-beta
+  name: "V3.4.4 Überprüfung des __Host-Präfixes bei Session-Cookies"
+  description: "Dieser Check überprüft, ob Cookie-basierte Session-Tokens das '__Host-' Präfix verwenden"
+  author: "Ali Al-Haidary"
+  tags: "Cookies, Session-Management"
+
+given response then
+  # Überprüfe Set-Cookie-Header auf das Fehlen des '__Host-' Präfixes
+  if {latest.response} matches "(?i)Set-Cookie: (?!__Host-)[^;]+" then
+    report issue:
+      severity: medium
+      confidence: firm
+      detail: "Session-Cookies ohne das '__Host-' Präfix wurden gefunden."
+      remediation: "Sicherstellen, dass alle Session-Cookies das '__Host-' 
+                    Präfix verwenden, um eine strikte Bindung an den Ursprungs-Host 
+                    zu gewährleisten und die Sicherheit zu erhöhen."
+  end if
+
+

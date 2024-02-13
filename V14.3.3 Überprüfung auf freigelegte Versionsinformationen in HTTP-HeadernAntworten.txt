@@ -1,0 +1,23 @@
+metadata:
+    language: v1-beta
+    name: "V14.3.3 Überprüfung auf freigelegte Versionsinformationen in HTTP-Headern/Antworten"
+    description: "Dieses BCheck sucht nach detaillierten Versionsinformationen in HTTP-Headern oder Antworten."
+    author: "Ali Al-Haidary"
+    tags: "Information Disclosure, HTTP Headers"
+
+define:
+    versionInfoRegex = "Server:.*?/\d+\.\d+(\.\d+)?|X-Powered-By:.*?/\d+\.\d+(\.\d+)?"
+
+    issueDetail = "Freigelegte detaillierte Versionsinformationen in HTTP-Headern oder Antworten"
+    issueRemediation = "Vermeiden der Offenlegung detaillierter Versionsinformationen der Server-Software in 
+                         HTTP-Headern oder Antworten."
+
+given response then
+    if {latest.response.headers} matches "{versionInfoRegex}" or {latest.response.body} matches "{versionInfoRegex}" then
+        report issue:
+            severity: medium
+            confidence: firm
+            detail: `{issueDetail}`
+            remediation: `{issueRemediation}`
+    end if
+

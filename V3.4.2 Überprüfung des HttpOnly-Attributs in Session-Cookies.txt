@@ -1,0 +1,21 @@
+metadata:
+  language: v1-beta
+  name: "V3.4.2 Überprüfung des HttpOnly-Attributs in Session-Cookies"
+  description: "Dieser Check überprüft, ob das 'HttpOnly'-Attribut bei Cookie-basierten 
+                Session-Tokens gesetzt ist."
+  author: "Ali Al-Haidary"
+  tags: "Cookies, Session-Management"
+
+
+given response then
+  # Überprüfe Set-Cookie-Header auf das Fehlen des 'HttpOnly'-Attributs
+  if {latest.response} matches "(?i)Set-Cookie: [^;]+;?(?!.*;\\s*HttpOnly\\s*(;|$))" then
+    report issue:
+      severity: medium
+      confidence: firm
+      detail: "Session-Cookies ohne das 'HttpOnly'-Attribut wurden gefunden."
+      remediation: "Sicherstellen, dass das 'HttpOnly'-Attribut für alle Session-Cookies 
+                    gesetzt ist, um vor Zugriff durch clientseitige Skripte zu schützen."
+  end if
+
+

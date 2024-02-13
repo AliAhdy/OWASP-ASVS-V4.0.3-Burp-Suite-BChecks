@@ -1,0 +1,42 @@
+metadata:
+    language: v1-beta
+    name: "v14.5.3 Überprüfung des CORS Access-Control-Allow-Origin Headers"
+    description: "Überprüft die Konfiguration des CORS Access-Control-Allow-Origin Headers, 
+                  um sicherzustellen, dass eine strenge Zulassungsliste von vertrauenswürdigen 
+                  Domänen und Subdomänen verwendet und das 'null'-Value nicht unterstützt."
+    author: "Ali Al-Haidary"
+    tags: "Konfiguration, CORS-Header"
+
+define:
+    null_origin = "null"
+    subdomain_origin = `{random_str(5)}`
+
+given request then
+ # Überprüfung auf 'null'-Origin
+    send request called check_null:
+        replacing headers:
+            "Origin": {null_origin}
+    if "Access-Control-Allow-Origin: null" in {check_null.response.headers} and 
+        {check_null.response.headers} matches "Access-Control-Allow-Credentials: true" then
+        report issue:
+            severity: medium
+            confidence: certain
+            detail: "Der Access-Control-Allow-Origin Antwort-Header spiegelt den 'null'-Ursprung wider."
+            remediation: "Verwenden einer strenge Whitelist von vertrauenswürdigen Domänen 
+                          und nicht den 'null'-Ursprung zulassen."
+    end if
+
+    # Überprüfung auf Subdomänen-Origin
+    send request called check_subdomain:
+        replacing headers:
+            "Origin": `https://{subdomain_origin}.{base.request.url.host}`
+    if `Access-Control-Allow-Origin: https://{subdomain_origin}.{base.request.url.host}` 
+        in {check_subdomain.response.headers} and {check_subdomain.response.headers} matches 
+        "Access-Control-Allow-Credentials: true" then
+        report issue:
+            severity: medium
+            confidence: certain
+            detail: "Der Access-Control-Allow-Origin Antwort-Header spiegelt den Subdomänen-Ursprung wider."
+            remediation: "Verwenden Sie eine strenge Whitelist von vertrauenswürdigen Domänen und 
+                           unterstützen Sie nicht den 'null'-Ursprung."
+    end if

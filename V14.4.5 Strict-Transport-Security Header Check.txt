@@ -1,0 +1,27 @@
+metadata:   
+    language: v1-beta
+    name: "V14.4.5 Strict-Transport-Security Header Check"
+    description: "Überprüft das Vorhandensein des Strict-Transport-Security Headers 
+                   mit 'max-age=15724800; includeSubDomains' in der Antwort und ob 
+                  'max-age' weniger als 15724800 beträgt."
+    author: "Ali Al-Haidary"
+    tags: "Konfiguration, Strict-Transport-Security Header"
+
+#Überprüfter Header
+define:
+    hstsCol = "Strict-Transport-Security:"
+
+    issueDetailLowMaxAge = "Der max-age-Wert des Strict-Transport-Security Headers ist geringer als {minAge}."
+    issueRemediationLowMaxAge = "Setzen Sie den max-age-Wert des Strict-Transport-Security Headers auf mindestens {minAge}."
+
+given response then
+    if not ({latest.response.headers} matches "{hstsCol}.*(?i)max-age=(15724[8-9][0-9]{2}|1572[5-9][0-9]
+            {3}|157[3-9][0-9]{4}|15[8-9][0-9]{5}|1[6-9][0-9]{6}|[2-9][0-9]
+            {7}|[1-9][0-9]{8}|[1-9][0-9]{8}).*includeSubDomains.*") then
+        report issue:
+            severity: low
+            confidence: certain
+            detail: "{issueDetailLowMaxAge}"
+            remediation: "{issueRemediationLowMaxAge}"
+    end if
+
